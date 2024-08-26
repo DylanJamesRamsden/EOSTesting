@@ -17,6 +17,8 @@ AEOSPlayerController::AEOSPlayerController()
 void AEOSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+    Login(); //Call login function 
 }
 
 void AEOSPlayerController::Login()
