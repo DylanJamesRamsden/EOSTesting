@@ -23,6 +23,10 @@ void AEOSPlayerController::BeginPlay()
 
 void AEOSPlayerController::Login()
 {
+
+    /* @TODO This entire function doesn't make sense to me, if there is an auth type in the command line, it just auto logins but if there isn't
+     * it runs an AccountPortal login. Defeats the point of passing in AccountPortal into the command line so should probably inverse it. */
+    
 	/*
     Tutorial 2: This function will access the EOS OSS via the OSS identity interface to log first into Epic Account Services, and then into Epic Game Services.
     It will bind a delegate to handle the callback event once login call succeeeds or fails. 
@@ -63,7 +67,7 @@ void AEOSPlayerController::Login()
             UE_LOG(LogTemp, Warning, TEXT("Failed to login... ")); // Log to the UE logs that we are trying to log in.
 			// Clear our handle and reset the delegate.
 			Identity->ClearOnLoginCompleteDelegate_Handle(0, LoginDelegateHandle);
-            LoginDelegateHandle.Reset();			
+            LoginDelegateHandle.Reset();
         }
     }
     else
@@ -97,6 +101,7 @@ void AEOSPlayerController::HandleLoginCompleted(int32 LocalUserNum, bool bWasSuc
     IOnlineIdentityPtr Identity = Subsystem->GetIdentityInterface();
     if (bWasSuccessful)
     {
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Login successful!"));
         UE_LOG(LogTemp, Log, TEXT("Login callback completed!"));; 
     }
     else //Login failed

@@ -12,8 +12,9 @@
   <component name="ChangeListManager">
     <list default="true" id="365afbdf-f0d3-4764-a8fd-a6e5a381e81f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.EOS_OSS_Tutorial/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.EOS_OSS_Tutorial/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/EOS_OSS_Tutorial/EOSPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/EOS_OSS_Tutorial/EOSPlayerController.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/EOS_OSS_Tutorial/EOSPlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/EOS_OSS_Tutorial/EOSPlayerController.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/EOS_OSS_Tutorial/EOS_OSS_TutorialGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/EOS_OSS_Tutorial/EOS_OSS_TutorialGameMode.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -466,7 +467,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1724659833157</updated>
-      <workItem from="1724659834171" duration="2351000" />
+      <workItem from="1724659834171" duration="7414000" />
     </task>
     <servers />
   </component>

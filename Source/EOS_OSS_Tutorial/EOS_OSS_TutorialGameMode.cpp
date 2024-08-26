@@ -15,5 +15,5 @@ AEOS_OSS_TutorialGameMode::AEOS_OSS_TutorialGameMode()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 
-	PlayerControllerClass = AEOSPlayerController::StaticClass(); // Tutorial 2: Setting the PlayerController to our custome one.
+	PlayerControllerClass = AEOSPlayerController::StaticClass(); // Tutorial 2: Setting the PlayerController to our custom one.
 }
