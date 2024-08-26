@@ -13,7 +13,6 @@
     <list default="true" id="365afbdf-f0d3-4764-a8fd-a6e5a381e81f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.EOS_OSS_Tutorial/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.EOS_OSS_Tutorial/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EOS_OSS_Tutorial.uproject" beforeDir="false" afterPath="$PROJECT_DIR$/EOS_OSS_Tutorial.uproject" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -432,7 +431,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1724659833157</updated>
-      <workItem from="1724659834171" duration="674000" />
+      <workItem from="1724659834171" duration="1268000" />
     </task>
     <servers />
   </component>
