@@ -53,7 +53,9 @@ void AEOSPlayerController::Login()
     // Grab command line parameters. If empty call hardcoded login function - Hardcoded login function useful for Play In Editor. 
     FString AuthType; 
     FParse::Value(FCommandLine::Get(), TEXT("AUTH_TYPE="), AuthType);
- 
+
+    // @TODO If the AuthType isn't empty, an AutoLogin is done. This doesn't seem right as we may way to pass in different AuthTypes
+    // into the command line, but leaving as it
     if (!AuthType.IsEmpty()) //If parameter is NOT empty we can autologin.
     {
         /* 
@@ -76,7 +78,11 @@ void AEOSPlayerController::Login()
         Fallback if the CLI parameters are empty.Useful for PIE.
         The type here could be developer if using the DevAuthTool, ExchangeCode if the game is launched via the Epic Games Launcher, etc...
         */
-        FOnlineAccountCredentials Credentials("AccountPortal","", "");
+        // @TODO Account Portal
+       //  FOnlineAccountCredentials Credentials("AccountPortal","", "");
+
+        // @TODO Developer
+        FOnlineAccountCredentials Credentials("Developer","127.0.0.1:8081", "Client1");
  
         UE_LOG(LogTemp, Log, TEXT("Logging into EOS...")); // Log to the UE logs that we are trying to log in. 
         
@@ -107,7 +113,7 @@ void AEOSPlayerController::HandleLoginCompleted(int32 LocalUserNum, bool bWasSuc
     else //Login failed
         {
         // If your game is online only, you may want to return an errror to the user and return to a menu that uses a different GameMode/PlayerController.
- 
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Login failed! " + Error));
         UE_LOG(LogTemp, Warning, TEXT("EOS login failed.")); //Print sign in failure in logs as a warning.
         }
  
