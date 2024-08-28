@@ -9,6 +9,7 @@
 #include "OnlineSubsystemTypes.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSessionSettings.h"
+#include "GameFramework/PlayerState.h"
 #include "Interfaces/OnlineIdentityInterface.h"
 #include "Interfaces/OnlineStatsInterface.h"
 
@@ -185,5 +186,177 @@ void AEOSGameSession::HandleStartSessionCompleted(FName MySessionName, bool bWas
  
 	Session->ClearOnStartSessionCompleteDelegate_Handle(StartSessionDelegateHandle);
 	StartSessionDelegateHandle.Reset();
+}
+
+void AEOSGameSession::UnregisterPlayer(const APlayerController* ExitingPlayer)
+{
+	// Tutorial 3: Override base function to Unregister player in EOS Session
+	Super::UnregisterPlayer(ExitingPlayer);
+ 
+	// Only need to unregisted the player in the EOS Session on the Server 
+	if (IsRunningDedicatedServer())
+	{
+		IOnlineSubsystem* Subsystem = Online::GetSubsystem(GetWorld());
+		IOnlineIdentityPtr Identity = Subsystem->GetIdentityInterface(); 
+		IOnlineSessionPtr Session = Subsystem->GetSessionInterface();
+
+		//@TODO Moved this our of the scope of the if as I can see that we are unbinding if PS is not valid
+		// Bind delegate to callback function
+		UnregisterPlayerDelegateHandle = Session->AddOnUnregisterPlayersCompleteDelegate_Handle(FOnUnregisterPlayersCompleteDelegate::CreateUObject(
+				this, &ThisClass::HandleUnregisterPlayerCompleted));
+ 
+		if (ExitingPlayer->PlayerState) // If the player leaves ungracefully this could be null
+		{
+			 const FUniqueNetId& UniqueID = *ExitingPlayer->PlayerState->GetUniqueId();
+			if (!Session->UnregisterPlayer(SessionName, UniqueID)) 
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Failed to Unregister Player!"));
+				Session->ClearOnUnregisterPlayersCompleteDelegate_Handle(UnregisterPlayerDelegateHandle);
+				UnregisterPlayerDelegateHandle.Reset();
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to Unregister Player!"));
+			Session->ClearOnUnregisterPlayersCompleteDelegate_Handle(UnregisterPlayerDelegateHandle);
+			UnregisterPlayerDelegateHandle.Reset();
+		}
+	}
+}
+
+void AEOSGameSession::NotifyLogout(const APlayerController* PC)
+{
+	// Tutorial 3: Overide base function to handle players leaving EOS Session.
+	//@TODO If you jump to the parent function, you can see it calls UnregisterPlayer
+	Super::NotifyLogout(PC); //This calls UnregisterPlayer
+
+	// When players leave the dedicated server we need to check how many players are left. If 0 players are left, session is destroyed.  
+	if (IsRunningDedicatedServer())
+	{
+		NumberOfPlayersInSession--; // Keep track of players as they leave
+        
+		// No one left in server - end session if session is InProgress
+		if (NumberOfPlayersInSession==0)
+		{
+			IOnlineSubsystem* Subsystem = Online::GetSubsystem(GetWorld());
+			IOnlineSessionPtr Session = Subsystem->GetSessionInterface();
+			
+			if (Session->GetSessionState(SessionName) == EOnlineSessionState::InProgress)
+			{
+				EndSession();
+			}        
+		}
+	}
+	else
+	{
+		// This isn't "handling" the error when the server is full, just a log to help keep track of the flow. 
+		UE_LOG(LogTemp, Log, TEXT("Player is leaving the dedicated server. This may be a kick because the server is full if the player didn't leave intentionally."))
+	}
+}
+
+void AEOSGameSession::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	DestroySession();
+}
+
+void AEOSGameSession::HandleUnregisterPlayerCompleted(FName EOSSessionName, const TArray<FUniqueNetIdRef>& PlayerIds, bool bWasSuccesful)
+{
+	// Tutorial 3: This function is triggered via the callback we set in UnregisterPlayer once the player is unregistered (or there is a failure).
+ 
+	IOnlineSubsystem* Subsystem = Online::GetSubsystem(GetWorld());
+	IOnlineSessionPtr Session = Subsystem->GetSessionInterface();
+ 
+	// Just log, clear and reset delegate. 
+	if (bWasSuccesful)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Player unregistered in EOS Session!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to unregister player! (From Callback)"));
+	}
+	Session->ClearOnUnregisterPlayersCompleteDelegate_Handle(UnregisterPlayerDelegateHandle);
+	UnregisterPlayerDelegateHandle.Reset();
+}
+
+void AEOSGameSession::EndSession()
+{
+	// Tutorial 3: This function is called once all players have left the session. It will mark the EOS Session as ended. 
+	IOnlineSubsystem* Subsystem = Online::GetSubsystem(GetWorld());
+	IOnlineSessionPtr Session = Subsystem->GetSessionInterface();
+ 
+	// Bind delegate to callback function
+	EndSessionDelegateHandle =
+		Session->AddOnEndSessionCompleteDelegate_Handle(FOnEndSessionCompleteDelegate::CreateUObject(
+			this, &ThisClass::HandleEndSessionCompleted));
+ 
+	if (!Session->EndSession(SessionName))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to end session!"));
+		Session->ClearOnEndSessionCompleteDelegate_Handle(StartSessionDelegateHandle);
+		EndSessionDelegateHandle.Reset();
+	}
+}
+ 
+ 
+void AEOSGameSession::HandleEndSessionCompleted(FName EOSSessionName, bool bWasSuccessful)
+{
+	// Tutorial 3: This function is triggered via the callback we set in EndSession once the session is ended (or there is a failure).
+	IOnlineSubsystem* Subsystem = Online::GetSubsystem(GetWorld());
+	IOnlineSessionPtr Session = Subsystem->GetSessionInterface();
+ 
+	// Just log, clear and reset delegate. 
+	if (bWasSuccessful)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Session ended!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to end session! (From Callback)"));
+	}
+ 
+	Session->ClearOnEndSessionCompleteDelegate_Handle(EndSessionDelegateHandle);
+	EndSessionDelegateHandle.Reset();
+}
+
+void AEOSGameSession::DestroySession()
+{
+	// Tutorial 3: This function is called when all players leave the dedicated server. It will destroy the EOS Session which will remove it from the EOS backend.  
+	IOnlineSubsystem* Subsystem = Online::GetSubsystem(GetWorld());
+	IOnlineSessionPtr Session = Subsystem->GetSessionInterface();
+ 
+	DestroySessionDelegateHandle =
+		Session->AddOnDestroySessionCompleteDelegate_Handle(FOnDestroySessionCompleteDelegate::CreateUObject(
+			this, &ThisClass::HandleDestroySessionCompleted));
+ 
+	if (!Session->DestroySession(SessionName))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to destroy session.")); // Log to the UE logs that we are trying to log in. 
+		Session->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionDelegateHandle);
+		DestroySessionDelegateHandle.Reset();
+	}
+}
+ 
+void AEOSGameSession::HandleDestroySessionCompleted(FName EOSSessionName, bool bWasSuccesful)
+{
+	// Tutorial 3: This function is triggered via the callback we set in DestroySession once the session is destroyed (or there is a failure).
+ 
+	IOnlineSubsystem* Subsystem = Online::GetSubsystem(GetWorld());
+	IOnlineSessionPtr Session = Subsystem->GetSessionInterface();
+ 
+	if (bWasSuccesful)
+	{
+		bSessionExists = false; // Mark that the session doesn't exist. This way next time BeginPlay is called a new session will be created. 
+		UE_LOG(LogTemp, Log, TEXT("Destroyed session succesfully.")); 
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to destroy session.")); 
+	}
+ 
+	Session->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionDelegateHandle);
+	DestroySessionDelegateHandle.Reset();
 }
 

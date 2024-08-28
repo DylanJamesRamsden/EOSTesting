@@ -1,0 +1,1 @@
+"C:\Program Files\Epic Games\UE_5.4\Engine\Binaries\Win64\UnrealEditor.exe"  "C:\Users\Dylan\Documents\GitHub\EOSTesting\EOS_OSS_Tutorial.uproject" ThirdPersonMap -server -log -epicapp="EOS_OSS_Tutorial_Dedicated_Server"

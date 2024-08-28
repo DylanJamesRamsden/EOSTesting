@@ -26,6 +26,15 @@ private:
 	// Delegate to bind callback event for start session. 
 	FDelegateHandle StartSessionDelegateHandle;
 
+	// Delegate to bind callback event for unregister player. 
+	FDelegateHandle UnregisterPlayerDelegateHandle;
+
+	// Delegate to bind callback event for end session. 
+	FDelegateHandle EndSessionDelegateHandle;
+
+	// Delegate to bind callback event for destroy session. 
+	FDelegateHandle DestroySessionDelegateHandle; 
+
 	// Used to keep track if the session exists or not. 
 	bool bSessionExists = false;
 
@@ -45,6 +54,12 @@ protected:
 
 	virtual void RegisterPlayer(APlayerController* NewPlayer, const FUniqueNetIdRepl& UniqueId, bool bWasFromInvite) override;
 
+	virtual void UnregisterPlayer(const APlayerController* ExitingPlayer) override;
+
+	virtual void NotifyLogout(const APlayerController* PC) override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 private:
 
 	void HandleCreateSessionCompleted(FName EOSSessionName, bool bWasSuccessful);
@@ -54,5 +69,15 @@ private:
 	void StartSession();
 
 	// Callback function. This function will run when start session compeletes.
-	void HandleStartSessionCompleted(FName MySessionName, bool bWasSuccessful); 
+	void HandleStartSessionCompleted(FName MySessionName, bool bWasSuccessful);
+
+	void HandleUnregisterPlayerCompleted(FName EOSSessionName, const TArray<FUniqueNetIdRef>& PlayerIds, bool bWasSuccesful);
+	
+	void EndSession();
+	
+	void HandleEndSessionCompleted(FName EOSSessionName, bool bWasSuccessful);
+	
+	void DestroySession();
+	
+	void HandleDestroySessionCompleted(FName EOSSessionName, bool bWasSuccesful);
 };
